@@ -16,7 +16,7 @@ export const useBlogStore = defineStore('blog', () => {
             throw new Error(`Error fetching posts: ${response.statusText}`)
         }
         const data = await response.json()
-        posts.value = data.posts
+        posts.value = data
     } catch (error) {
         errorMessage.value = error.message
     } finally {

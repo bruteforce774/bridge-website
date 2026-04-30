@@ -14,7 +14,7 @@ onMounted(() => {
 <template>
     <h1>Home</h1>
     <p v-if="blogStore.isLoading">Loading...</p>
-    <p v-if="blogStore.errorMessage">{{ blogStore.errorMessage }}</p>
+    <p v-else-if="blogStore.errorMessage">{{ blogStore.errorMessage }}</p>
     <ul v-else>
         <li v-for="post in blogStore.posts" :key="post.id">
             <h2>{{ post.title }}</h2>
