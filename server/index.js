@@ -1,9 +1,11 @@
 import 'dotenv/config'
 import express from 'express'
-import { MongoCLient } from 'mongodb'
+import { MongoClient } from 'mongodb'
 import path from 'path'
 
 const { MONGODB_URI, DB_NAME = 'bridge', PORT = 3000 } = process.env
+const client = new MongoClient(MONGODB_URI)
+const app = express()
 
 let db
 
