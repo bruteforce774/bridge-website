@@ -11,7 +11,7 @@ export const useBlogStore = defineStore('blog', () => {
     errorMessage.value = null
 
     try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+        const response = await fetch('/api/posts')
         if (!response.ok) {
             throw new Error(`Error fetching posts: ${response.statusText}`)
         }
