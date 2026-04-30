@@ -2,5 +2,5 @@
 </script>
 
 <template>
-  <router-view></router-view>
+    <h1>Home</h1>
 </template>
