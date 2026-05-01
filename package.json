@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueup/vue-quill": "^1.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "isomorphic-dompurify": "^3.11.0",

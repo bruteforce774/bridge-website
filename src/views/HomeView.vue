@@ -18,7 +18,7 @@ onMounted(() => {
     <ul v-else>
         <li v-for="post in blogStore.posts" :key="post.id">
             <h2>{{ post.title }}</h2>
-            <p>{{ post.body }}</p>
+            <div v-html="post.body"></div>
         </li>
     </ul>
 </template>
