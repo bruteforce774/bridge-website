@@ -2,6 +2,8 @@ import 'dotenv/config'
 import express from 'express'
 import { MongoClient, ObjectId } from 'mongodb'
 import DOMPurify from 'isomorphic-dompurify'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 const { MONGODB_URI, DB_NAME = 'bridge', PORT = 3000, ADMIN_PASSWORD } = process.env
 
@@ -10,10 +12,14 @@ if (!ADMIN_PASSWORD) {
   process.exit(1)
 }
 
-const client = new MongoClient(MONGODB_URI)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
+const client = new MongoClient(MONGODB_URI)
 const app = express()
+
 app.use(express.json({ limit: '1mb' }))
+app.use(express.static(path.join(__dirname, '..', 'dist')))
 
 let db
 
@@ -53,6 +59,10 @@ app.post('/api/posts', requireAdmin, async (req, res) => {
     console.error('Failed to create post:', error)
     res.status(500).json({ error: 'Failed to create post' })
   }
+})
+
+app.get('/{*splat}', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'))
 })
 
 try {
