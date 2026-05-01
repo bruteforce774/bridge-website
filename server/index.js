@@ -4,6 +4,7 @@ import { MongoClient, ObjectId } from 'mongodb'
 import DOMPurify from 'isomorphic-dompurify'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import rateLimit from 'express-rate-limit'
 
 const { MONGODB_URI, DB_NAME = 'bridge', PORT = 3000, ADMIN_PASSWORD } = process.env
 
@@ -19,7 +20,12 @@ const client = new MongoClient(MONGODB_URI)
 const app = express()
 
 app.use(express.json({ limit: '1mb' }))
-app.use(express.static(path.join(__dirname, '..', 'dist')))
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many attempts, try again later' },
+})
 
 let db
 
@@ -41,7 +47,7 @@ app.get('/api/posts', async (_req, res) => {
   }
 })
 
-app.post('/api/posts', requireAdmin, async (req, res) => {
+app.post('/api/posts', adminLimiter, requireAdmin, async (req, res) => {
   try {
     const { title, body } = req.body
     if (!title || !body) {
@@ -60,6 +66,8 @@ app.post('/api/posts', requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to create post' })
   }
 })
+
+app.use(express.static(path.join(__dirname, '..', 'dist')))
 
 app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'))

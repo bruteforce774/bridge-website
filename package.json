@@ -13,6 +13,7 @@
     "@vueup/vue-quill": "^1.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.4.1",
     "isomorphic-dompurify": "^3.11.0",
     "jsdom": "^29.1.1",
     "mongodb": "^7.2.0",
