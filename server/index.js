@@ -1,13 +1,29 @@
 import 'dotenv/config'
 import express from 'express'
-import { MongoClient } from 'mongodb'
-import path from 'path'
+import { MongoClient, ObjectId } from 'mongodb'
+import DOMPurify from 'isomorphic-dompurify'
 
-const { MONGODB_URI, DB_NAME = 'bridge', PORT = 3000 } = process.env
+const { MONGODB_URI, DB_NAME = 'bridge', PORT = 3000, ADMIN_PASSWORD } = process.env
+
+if (!ADMIN_PASSWORD) {
+  console.error('ADMIN_PASSWORD env var is required')
+  process.exit(1)
+}
+
 const client = new MongoClient(MONGODB_URI)
+
 const app = express()
+app.use(express.json({ limit: '1mb' }))
 
 let db
+
+function requireAdmin(req, res, next) {
+  const provided = req.get('x-admin-password')
+  if (provided !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  next()
+}
 
 app.get('/api/posts', async (_req, res) => {
   try {
@@ -16,6 +32,26 @@ app.get('/api/posts', async (_req, res) => {
   } catch (error) {
     console.error('Failed to fetch posts:', error)
     res.status(500).json({ error: 'Failed to fetch post' })
+  }
+})
+
+app.post('/api/posts', requireAdmin, async (req, res) => {
+  try {
+    const { title, body } = req.body
+    if (!title || !body) {
+      return res.status(400).json({ error: 'title and body are required' })
+    }
+    const cleanBody = DOMPurify.sanitize(body)
+    const result = await db.collection('posts').insertOne({
+      title,
+      body: cleanBody,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    res.json({ _id: result.insertedId, title, body: cleanBody })
+  } catch (error) {
+    console.error('Failed to create post:', error)
+    res.status(500).json({ error: 'Failed to create post' })
   }
 })
 
